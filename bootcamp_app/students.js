@@ -16,18 +16,20 @@ const pool = new Pool({
 //   console.log(res.rows);
 // })
 // .catch(err => console.error('query error', err.stack));
-const args1 = process.argv[2];
-const args2 = process.argv[3];
-console.log(args1, args2);
-pool.query(
-  
-  `
+const cohortsName = process.argv[2];
+const limit = process.argv[3];
+const queryString =  
+`
 SELECT students.id AS id, students.name AS name, cohorts.name AS cohort_name
 FROM students 
 JOIN cohorts ON cohort_id = cohorts.id
-WHERE cohorts.name LIKE '%${process.argv[2]}%'
-LIMIT ${args2};
-`)
+WHERE cohorts.name LIKE $1
+LIMIT $2;
+`
+const values = [`%${cohortsName}%`,limit]
+pool.query(
+  queryString,values
+  )
 .then(res => {
   res.rows.forEach(user => {
     console.log(`${user.name} has an id of ${user.id} and was in the ${user.cohort_name} cohort`);
